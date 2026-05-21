@@ -1,6 +1,6 @@
 // Componente ContactForm - Formulário de contato com validação
 import React, { useState } from 'react';
-import axios from 'axios';
+import { contactService } from '../../services/api';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -59,8 +59,13 @@ const ContactForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Simulação de envio para API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await contactService.sendMessage({
+        nome: formData.name,
+        email: formData.email,
+        telefone: '',
+        assunto: 'Mensagem via Formulário de Contacto',
+        mensagem: formData.message
+      });
       setSubmitStatus({ type: 'success', message: 'Mensagem enviada com sucesso! Entraremos em contato em breve.' });
       setFormData({ name: '', email: '', message: '' });
     } catch (error) {

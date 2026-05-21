@@ -1,0 +1,29 @@
+Relatório de Trabalho - 21 de Maio de 2026
+--------------------------------------------------
+
+1. Configuração do Ambiente de Desenvolvimento Frontend:
+   - Verificação da estrutura do projeto frontend (`jd-instituicao-frontend`).
+   - Instalação e atualização das dependências via npm.
+   - Teste e inicialização do servidor de desenvolvimento local.
+
+2. Criação e Integração da API Backend (Node.js/Express):
+   - Configuração do servidor backend (`server.js`).
+   - Conexão do backend com o banco de dados PostgreSQL (`config/db.js`).
+   - Resolução de problemas de CORS e portas para comunicação entre frontend (3000) e backend (5000).
+
+3. Criação de Rotas e Controladores (Backend):
+   - `authRoutes` / `authController`: Autenticação e login de administrador.
+   - `publicRoutes` / `publicController`: Recebimento de mensagens de contato, submissão de candidaturas, listagem de portfólio e blog.
+   - `adminRoutes` / `adminController`: Gerenciamento de mensagens recebidas e gestão de imagens da galeria.
+   - Implementação de middleware de autenticação (`auth.js`) para proteger rotas administrativas.
+
+4. Implementação do Painel Administrativo (Frontend):
+   - Atualização do `AdminDashboard.jsx` para integrar com a API e exibir estatísticas e mensagens reais do banco de dados.
+   - Criação do componente `AdminGallery.jsx` para visualização e gerenciamento (upload/exclusão) de imagens na galeria.
+   - Conexão do formulário de contato (`ContactForm.jsx`) com a API para envio real de mensagens ao banco de dados.
+
+5. Correção e Ajuste de Mapeamento de Dados:
+   - Resolução de erros no mapeamento e formato de dados (Data Format Issues) vindos do PostgreSQL para os componentes do frontend (Recrutamento, Portfólio, e Blog).
+
+6. Melhorias de Segurança e Boas Práticas:
+   - Adição do diretório `backend/node_modules/` e do arquivo `backend/.env` ao `.gitignore` para evitar o vazamento de credenciais e arquivos pesados no repositório.

@@ -68,3 +68,13 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+---
+
+## Atualizações Recentes (21 de Maio de 2026)
+
+- **Backend (Node.js & Express):** Criação da infraestrutura de backend com conexão ao PostgreSQL. Implementação de rotas e controladores para autenticação, administração (mensagens e galeria) e rotas públicas.
+- **Painel de Administração:** Desenvolvimento e integração do Painel de Administração (`AdminDashboard.jsx`, `AdminGallery.jsx`) com a API, permitindo leitura de mensagens de contato e gerenciamento de imagens da galeria.
+- **Frontend & Integração:** Conexão dos formulários públicos (ex: `ContactForm.jsx`) à API para envio de dados ao banco. Resolução de bugs no mapeamento de dados (Recrutamento, Portfólio, Blog) e ajustes de CORS.
+- **Segurança:** Configuração de middlewares de autenticação e proteção de dados sensíveis (`.env` e `node_modules` adicionados ao `.gitignore`).
+

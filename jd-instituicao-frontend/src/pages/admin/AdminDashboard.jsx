@@ -5,6 +5,7 @@ import api from '../../services/api';
 import AdminBlog from './AdminBlog';
 import AdminRecruitment from './AdminRecruitment';
 import AdminPortfolio from './AdminPortfolio';
+import AdminGallery from './AdminGallery';
 import AdminAnalytics from './AdminAnalytics';
 import AdminSettings from './AdminSettings';
 
@@ -111,8 +112,10 @@ export default function AdminDashboard() {
   const [jobs, setJobs]           = useState([]);
   const [projects, setProjects]   = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [gallery, setGallery]     = useState([]);
   const [loading, setLoading]     = useState(false);
   const [toast, setToast]         = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
 
   // guard
   useEffect(() => {
@@ -158,6 +161,9 @@ export default function AdminDashboard() {
       } else if (sec === 'subscribers') {
         const r = await api.get('/admin/subscribers');
         setSubs(r.data.data || []);
+      } else if (sec === 'gallery') {
+        const r = await api.get('/admin/gallery');
+        setGallery(r.data.data || []);
       }
     } catch (err) {
       console.error(err);
@@ -187,6 +193,7 @@ export default function AdminDashboard() {
     { id:'blog',         icon:'ri-article-line',       label:'Blog' },
     { id:'recruitment',  icon:'ri-briefcase-line',     label:'Recrutamento' },
     { id:'portfolio',    icon:'ri-image-gallery-line', label:'Portfólio' },
+    { id:'gallery',      icon:'ri-camera-line',        label:'Galeria' },
     { id:'analytics',    icon:'ri-bar-chart-line',     label:'Relatórios' },
     { id:'subscribers',  icon:'ri-rss-line',           label:'Newsletter' },
     { id:'settings',     icon:'ri-settings-4-line',    label:'Configurações' },
@@ -338,6 +345,7 @@ export default function AdminDashboard() {
                 rows={messages}
                 actions={row => (
                   <div style={{ display:'flex', gap:4, justifyContent:'flex-end' }}>
+                    <IBtn icon="ri-eye-line" color="#3b82f6" title="Ver" onClick={() => setSelectedMessage(row)} />
                     <InlineSelect value={row.status} options={[{value:'unread',label:'Não lida'},{value:'read',label:'Lida'},{value:'replied',label:'Respondida'}]}
                       onChange={v => act('put', `/admin/messages/${row.id}/status`, { status:v }, 'Estado atualizado')} />
                     <IBtn icon="ri-delete-bin-line" color="#ef4444" title="Eliminar" onClick={() => { if(window.confirm('Eliminar mensagem?')) act('delete', `/admin/messages/${row.id}`, null, 'Mensagem eliminada'); }} />
@@ -386,8 +394,65 @@ export default function AdminDashboard() {
             <AdminSettings />
           )}
 
+          {/* ── GALLERY ── */}
+          {section === 'gallery' && (
+            <AdminGallery items={gallery} loading={loading} onRefresh={() => load('gallery')} />
+          )}
+
         </main>
       </div>
+
+      {/* Message Modal */}
+      {selectedMessage && (
+        <div style={{ position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+          <div style={{ background:'#0d1526', border:'1px solid rgba(255,255,255,0.1)', borderRadius:24, width:'100%', maxWidth:600, overflow:'hidden', boxShadow:'0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+            <div style={{ padding:'24px 32px', borderBottom:'1px solid rgba(255,255,255,0.08)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <h3 style={{ margin:0, color:'#f1f5f9', fontSize:'1.25rem', fontWeight:800 }}>Mensagem de Contacto</h3>
+              <IBtn icon="ri-close-line" title="Fechar" onClick={() => setSelectedMessage(null)} />
+            </div>
+            <div style={{ padding:'32px', display:'flex', flexDirection:'column', gap:20 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }}>
+                <div>
+                  <p style={{ margin:'0 0 4px', color:'#64748b', fontSize:'0.8rem', fontWeight:600, textTransform:'uppercase' }}>Remetente</p>
+                  <p style={{ margin:0, color:'#cbd5e1', fontSize:'1rem' }}>{selectedMessage.nome}</p>
+                </div>
+                <div>
+                  <p style={{ margin:'0 0 4px', color:'#64748b', fontSize:'0.8rem', fontWeight:600, textTransform:'uppercase' }}>Email</p>
+                  <p style={{ margin:0, color:'#cbd5e1', fontSize:'1rem' }}>{selectedMessage.email}</p>
+                </div>
+                <div>
+                  <p style={{ margin:'0 0 4px', color:'#64748b', fontSize:'0.8rem', fontWeight:600, textTransform:'uppercase' }}>Telefone</p>
+                  <p style={{ margin:0, color:'#cbd5e1', fontSize:'1rem' }}>{selectedMessage.telefone || 'N/A'}</p>
+                </div>
+                <div>
+                  <p style={{ margin:'0 0 4px', color:'#64748b', fontSize:'0.8rem', fontWeight:600, textTransform:'uppercase' }}>Data</p>
+                  <p style={{ margin:0, color:'#cbd5e1', fontSize:'1rem' }}>{fmt(selectedMessage.created_at)}</p>
+                </div>
+              </div>
+              <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:20 }}>
+                <p style={{ margin:'0 0 4px', color:'#64748b', fontSize:'0.8rem', fontWeight:600, textTransform:'uppercase' }}>Assunto</p>
+                <p style={{ margin:'0 0 16px', color:'#f1f5f9', fontSize:'1.1rem', fontWeight:600 }}>{selectedMessage.assunto}</p>
+                <p style={{ margin:'0 0 4px', color:'#64748b', fontSize:'0.8rem', fontWeight:600, textTransform:'uppercase' }}>Mensagem</p>
+                <div style={{ background:'rgba(255,255,255,0.03)', padding:20, borderRadius:12, color:'#cbd5e1', fontSize:'0.95rem', lineHeight:1.6, whiteSpace:'pre-wrap' }}>
+                  {selectedMessage.mensagem}
+                </div>
+              </div>
+            </div>
+            <div style={{ padding:'20px 32px', borderTop:'1px solid rgba(255,255,255,0.08)', background:'rgba(0,0,0,0.2)', display:'flex', justifyContent:'flex-end', gap:12 }}>
+              <button onClick={() => {
+                act('put', `/admin/messages/${selectedMessage.id}/status`, { status: 'replied' }, 'Estado atualizado para Respondida');
+                setSelectedMessage(null);
+              }} style={{ background:'rgba(16,185,129,0.15)', color:'#10b981', border:'none', padding:'10px 20px', borderRadius:12, cursor:'pointer', fontWeight:600, display:'flex', alignItems:'center', gap:8 }}>
+                <i className="ri-check-double-line" />
+                Marcar como Respondida
+              </button>
+              <button onClick={() => setSelectedMessage(null)} style={{ background:'rgba(255,255,255,0.1)', color:'#f1f5f9', border:'none', padding:'10px 20px', borderRadius:12, cursor:'pointer', fontWeight:600 }}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (
