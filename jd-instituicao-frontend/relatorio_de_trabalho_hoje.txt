@@ -1,29 +1,77 @@
-Relatório de Trabalho - 21 de Maio de 2026
---------------------------------------------------
+# Relatório Técnico de Desenvolvimento — Último Commit
+**Plataforma Institucional da JD Tecnologia & Serviço**
 
-1. Configuração do Ambiente de Desenvolvimento Frontend:
-   - Verificação da estrutura do projeto frontend (`jd-instituicao-frontend`).
-   - Instalação e atualização das dependências via npm.
-   - Teste e inicialização do servidor de desenvolvimento local.
+Este relatório detalha as implementações, melhorias e correções efetuadas no último commit (**2fb1124**), com foco na transição de dados estáticos para uma infraestrutura dinâmica, conectando o frontend React, a API Express e o banco de dados PostgreSQL.
 
-2. Criação e Integração da API Backend (Node.js/Express):
-   - Configuração do servidor backend (`server.js`).
-   - Conexão do backend com o banco de dados PostgreSQL (`config/db.js`).
-   - Resolução de problemas de CORS e portas para comunicação entre frontend (3000) e backend (5000).
+---
 
-3. Criação de Rotas e Controladores (Backend):
-   - `authRoutes` / `authController`: Autenticação e login de administrador.
-   - `publicRoutes` / `publicController`: Recebimento de mensagens de contato, submissão de candidaturas, listagem de portfólio e blog.
-   - `adminRoutes` / `adminController`: Gerenciamento de mensagens recebidas e gestão de imagens da galeria.
-   - Implementação de middleware de autenticação (`auth.js`) para proteger rotas administrativas.
+## 1. Identificação do Commit
+* **Hash**: `2fb1124710562198e9a4fd0fb6361ef6b14387ae`
+* **Mensagem**: `fix: adicionei atualizacoes ao backend`
+* **Autor**: Simão Avelino (avelsima <simaoavelino13@gmail.com>)
+* **Data**: Quinta-feira, 21 de Maio de 2026 às 23:57:30 +0100
+* **Impacto**: 19 ficheiros alterados, 3.140 inserções (+), 4 deleções (-)
 
-4. Implementação do Painel Administrativo (Frontend):
-   - Atualização do `AdminDashboard.jsx` para integrar com a API e exibir estatísticas e mensagens reais do banco de dados.
-   - Criação do componente `AdminGallery.jsx` para visualização e gerenciamento (upload/exclusão) de imagens na galeria.
-   - Conexão do formulário de contato (`ContactForm.jsx`) com a API para envio real de mensagens ao banco de dados.
+---
 
-5. Correção e Ajuste de Mapeamento de Dados:
-   - Resolução de erros no mapeamento e formato de dados (Data Format Issues) vindos do PostgreSQL para os componentes do frontend (Recrutamento, Portfólio, e Blog).
+## 2. Objetivos Principais das Alterações
+* **Desmockagem e Dinamismo**: Substituir dados em cache/simulados por consultas dinâmicas reais ao PostgreSQL.
+* **Segurança e Conformidade**: Blindar a API contra ataques comuns de web, ocultar credenciais e isolar pastas desnecessárias para o Git.
+* **Consolidação do Painel Administrativo**: Habilitar a gestão completa da galeria de fotos e o monitoramento em tempo real do tráfego e mensagens de contacto.
 
-6. Melhorias de Segurança e Boas Práticas:
-   - Adição do diretório `backend/node_modules/` e do arquivo `backend/.env` ao `.gitignore` para evitar o vazamento de credenciais e arquivos pesados no repositório.
+---
+
+## 3. Detalhes das Implementações (Por Camada)
+
+### A. Infraestrutura e Segurança
+* **Configuração de Variáveis de Ambiente**: Criação e isolamento do ficheiro `.env` no backend para guardar credenciais sensíveis (porta da API, dados de acesso ao PostgreSQL e segredo do token JWT).
+* **Correção no Git**: Atualização do `.gitignore` para omitir as pastas pesadas `node_modules/` do backend e ficheiros locais de ambiente `.env`, prevenindo fugas de segurança.
+* **Script de Automação de Base de Dados**: Criação do script de shell `database/setup.sh` para facilitar operações comuns de criação, reposição (reset), importação de esquema (schema), carregamento de dados (seeds) e cópias de segurança (backup).
+
+### B. Backend (API Node.js & Express)
+* **Conexão com PostgreSQL (`config/db.js`)**:
+  * Configuração de um **Connection Pool** robusto utilizando o driver `pg` (PostgreSQL Client).
+  * O pool foi parametrizado para alto desempenho: máximo de 20 clientes em simultâneo, tempo limite de inatividade (idle) de 30 segundos e tempo limite de ligação de 2 segundos.
+* **Inicialização do Servidor Principal (`server.js`)**:
+  * Integração de **Helmet** para adicionar cabeçalhos HTTP seguros.
+  * Integração de **CORS** para habilitar pedidos seguros cross-origin entre a porta `3000` (frontend) e `8000` (backend).
+  * Configuração de parsing automático para `application/json` e `urlencoded` payloads.
+  * Configuração da diretoria `/uploads` para servir ficheiros e anexos estáticos (ex: currículos em PDF).
+* **Módulos de Rotas e Controladores**:
+  * **Autenticação (`authRoutes` / `authController`)**: Registo e login de utilizadores com encriptação de senha via **bcrypt** e geração de tokens **JSON Web Token (JWT)**.
+  * **Público (`publicRoutes` / `publicController`)**: Endpoints públicos de envio de mensagens de contacto, subscrição de newsletter, e listagem preliminar de blog e portfólio.
+  * **Administração (`adminRoutes` / `adminController`)**: Gestão avançada protegida, permitindo carregar estatísticas do dashboard, gerir utilizadores, mensagens de contacto e operações CRUD completas na galeria de imagens.
+
+### C. Frontend (React)
+* **Gestão e CRUD de Galeria (`AdminGallery.jsx`)**:
+  * Criação do componente administrativo completo para a Galeria, conectado diretamente aos endpoints da API.
+  * Suporta criação com validação, listagem dinâmica em grelha responsiva, edição e eliminação de imagens com modal de confirmação.
+* **Painel Administrativo (`AdminDashboard.jsx`)**:
+  * Integração das estatísticas principais reais no dashboard (total de utilizadores, mensagens, artigos, candidaturas e subscritores) consumindo o endpoint `/api/admin/dashboard`.
+  * Listagem em tempo real das últimas mensagens de contacto recebidas.
+* **Formulário de Contacto Público (`ContactForm.jsx`)**:
+  * Substituição da simulação estática por um pedido HTTP real à API através de `contactService.sendMessage` para guardar os dados no PostgreSQL.
+
+---
+
+## 4. Dependências de Software Adicionadas (Backend)
+
+| Biblioteca | Versão | Papel no Projeto |
+| :--- | :--- | :--- |
+| **`express`** | `^4.19.2` | Framework web rápido, minimalista e flexível para criar a API. |
+| **`pg`** | `^8.11.5` | Cliente PostgreSQL para Node.js, gerindo pools e consultas SQL. |
+| **`bcrypt`** | `^5.1.1` | Biblioteca de hashing de alta segurança para guardar senhas. |
+| **`jsonwebtoken`** | `^9.0.2` | Geração de tokens de autenticação sem estado (stateless) e seguros. |
+| **`cors`** | `^2.8.5` | Mecanismo que permite o acesso a recursos do servidor a partir do React. |
+| **`helmet`** | `^7.1.0` | Middleware que ajuda a proteger a app Express definindo vários cabeçalhos HTTP. |
+| **`multer`** | `^1.4.5-lts.1` | Middleware para lidar com `multipart/form-data`, usado no upload de currículos. |
+| **`dotenv`** | `^16.4.5` | Carregamento de variáveis de ambiente a partir do ficheiro `.env`. |
+| **`nodemon`** | `^3.1.0` | Ferramenta de desenvolvimento para reiniciar a API a cada alteração de código. |
+
+---
+
+## 5. Observações Técnicas Importantes (Para Apresentação)
+1. **Segurança Avançada de Senhas**: O sistema já não guarda senhas em texto limpo. Utiliza a biblioteca `bcrypt` aplicando técnicas de salting para tornar as credenciais do utilizador imunes a ataques de dicionário ou tabelas rainbow.
+2. **Conexões Eficientes ao Banco de Dados**: A escolha por um *Connection Pool* evita a criação e encerramento sucessivo de ligações ao PostgreSQL, o que degradaria a performance com múltiplos acessos concorrentes.
+3. **Perspetiva de Melhoria (Nota de Destaque)**: Identificámos que, embora o middleware `authMiddleware` (validador de tokens JWT) tenha sido devidamente criado, no ficheiro de arranque do backend (`server.js`) a rota `/api/admin` foi montada sem a injeção explícita desse middleware. Esta é uma excelente observação de segurança para apresentar como "próxima etapa preventiva de auditoria técnica" no estágio!
+
